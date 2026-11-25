@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Brojač smene</title>
+<title>Brojač</title>
 <meta name="theme-color" content="#1f4fd1">
 <meta name="description" content="Brojač stranaka, vozila i službenih poseta po smeni">
 <link rel="manifest" href="manifest.webmanifest">
@@ -17,11 +17,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* VOICE: friendly, confident, one-thumb use during a shift
-   IDEA: a checkpoint hand counter panel that fits one screen, no scrolling
-   PICTURE: six colour-coded counter plates filling the screen, slim blue header with a boom barrier
-   COLOUR and TYPE: signal blue lead, road orange and crimson as group colours; Barlow Condensed digits
-   LAYOUT: 100dvh grid: header / 2x3 cards (3x2 when wide) / action bar; history in a dialog */
 :root{color-scheme:light dark;--bg:light-dark(#eef2f8,#0b111c);--card:light-dark(#ffffff,#151e2e);--ink:light-dark(#0f1726,#eef2f8);--mute:light-dark(#5b6678,#97a3b8);--line:light-dark(#e1e6ee,#243149);--sky1:#1f4fd1;--sky2:#3b7bff;--c1:#2f6bff;--c2:#f07a12;--c3:#d92d4c;--red:light-dark(#c8202f,#ff6b74);--sh:light-dark(0 1px 2px #0f17260f,0 6px 18px #0f172612,0 1px 2px #0006,0 6px 18px #0005)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
@@ -36,9 +31,6 @@ h1{font:700 24px/1 "Barlow Condensed",sans-serif;margin:0}
 .chips{display:grid;gap:4px;margin-top:6px}.cr{display:flex;flex-wrap:wrap;align-items:center;gap:5px;opacity:.6}.cr.act{opacity:1}.cr b{font-size:12.5px;min-width:64px}.cr{flex-wrap:nowrap;gap:4px}.cr .chip{font-size:12.5px;padding:1px 7px;gap:4px}.cr .chip i{width:7px;height:7px}
 .chip{display:flex;align-items:center;gap:5px;background:#ffffff26;border-radius:999px;padding:1px 9px;font-size:13px;font-weight:600;white-space:nowrap}
 .chip i{width:8px;height:8px;border-radius:50%;background:var(--g);box-shadow:0 0 0 1.5px #fff}
-.tot{flex:none;background:#ffffff26;border:1px solid #ffffff40;border-radius:14px;padding:4px 12px;text-align:right}
-.tot b{display:block;font:700 clamp(32px,9vw,44px)/1 "Barlow Condensed",sans-serif;font-variant-numeric:tabular-nums}
-.tot span{font-size:12px;opacity:.9}
 main{width:100%;max-width:1000px;margin:0 auto;padding:8px max(3vw,8px);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:8px}
 .c{--g:var(--c1);background:var(--card);border-radius:16px;box-shadow:var(--sh);padding:8px;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:6px;border-top:4px solid var(--g);overflow:hidden}
 .top{display:flex;align-items:center;gap:7px}
@@ -70,16 +62,18 @@ button:disabled{opacity:.45;cursor:default}
 .bin{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .bin button{font-size:13.5px;padding:0 4px;line-height:1.1;min-height:44px}
 dialog{border:0;border-radius:18px;background:var(--card);color:var(--ink);padding:20px;width:min(94vw,420px);max-height:86dvh;box-shadow:0 20px 60px #0006}
-dialog.wide{width:min(96vw,900px)}
 dialog::backdrop{background:#0b111c99}
 dialog h3{margin:0 0 6px;font:700 22px "Barlow Condensed",sans-serif}
 dialog p{margin:0 0 14px;color:var(--mute)}#dlg .row{flex-wrap:wrap}#dlg .row button{flex:1 1 30%}
 .edit input{width:100%;font:700 34px "Barlow Condensed",sans-serif;text-align:center;padding:8px;border:2px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);margin-bottom:14px}
-.scroll{overflow:auto;max-height:60dvh;border:1px solid var(--line);border-radius:12px;margin-bottom:14px}
-table{width:100%;border-collapse:collapse;font-size:14px}
-th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
-th:first-child,td:first-child{text-align:left}
-th{color:var(--mute);font-weight:600;font-size:12.5px;position:sticky;top:0;background:var(--card)}
+#idle{position:fixed;inset:0;z-index:8;display:none;place-items:center;background:color-mix(in srgb,var(--bg) 70%,transparent);backdrop-filter:blur(3px);padding:20px}
+body.off #idle{display:grid}
+.ib{background:var(--card);border-radius:22px;box-shadow:0 20px 60px #0004;padding:22px;width:min(100%,380px);text-align:center}
+.ib svg{width:72px;height:72px;margin:0 auto 6px;display:block}
+.ib h2{font:700 30px/1.1 "Barlow Condensed",sans-serif;margin:0 0 4px}
+.ib p{color:var(--mute);margin:0 0 16px;font-size:15px}
+.ib button{display:block;width:100%;min-height:56px;font-size:18px;margin-top:10px}
+.ib .note{font-size:13px;margin:12px 0 0}
 .toast{position:fixed;left:50%;bottom:76px;transform:translate(-50%,10px);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:12px;font-size:15px;font-weight:600;opacity:0;pointer-events:none;transition:.2s;z-index:9}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 @media(min-width:760px) and (min-aspect-ratio:1/1){main{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));grid-auto-flow:column}.c label{font-size:15px}.plus{font-size:clamp(40px,9vh,100px)}.ic{width:34px;height:34px}.ic svg{width:22px;height:22px}h1{font-size:30px}}
@@ -95,7 +89,7 @@ th{color:var(--mute);font-weight:600;font-size:12.5px;position:sticky;top:0;back
     <g fill="#d92d4c"><rect x="14" y="36" width="16" height="7"/><rect x="46" y="36" width="16" height="7"/><rect x="78" y="36" width="16" height="7"/></g>
   </svg>
   <div class="hin">
-    <div><h1>Brojač smene</h1><div class="date"><button class="sh" id="shift" aria-label="Promeni smenu"></button><span id="date"></span></div><div class="chips" id="chips"></div></div>
+    <div><h1>Brojač</h1><div class="date"><button class="sh" id="shift" aria-label="Promeni smenu"></button><span id="date"></span></div><div class="chips" id="chips"></div></div>
   </div>
 </header>
 
@@ -109,6 +103,14 @@ th{color:var(--mute);font-weight:600;font-size:12.5px;position:sticky;top:0;back
 
 <dialog id="dlg"><h3 id="dt"></h3><p id="dmsg"></p><div class="row"><button id="dno">Otkaži</button><button id="dcp">Kopiraj pa obriši</button><button class="p d2" id="dyes">Obriši</button></div></dialog>
 <dialog id="edl" class="edit"><h3 id="elbl"></h3><p>Upišite tačan broj</p><input id="eval" type="number" inputmode="numeric" min="0"><div class="row"><button id="eno">Otkaži</button><button class="p" id="eyes">Sačuvaj</button></div></dialog>
+<div id="idle"><div class="ib">
+  <svg viewBox="0 0 24 24" fill="none" stroke="#1f4fd1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M10 8l6 4-6 4z" fill="#1f4fd1"/></svg>
+  <h2>Smena nije počela</h2>
+  <p id="imsg">Izaberite smenu da počnete brojanje.</p>
+  <button class="p" id="startD">Počni dnevnu smenu</button>
+  <button id="startN">Počni noćnu smenu</button>
+  <p class="note">Ako smenu ne završite, sama se završava i briše posle 12 sati.</p>
+</div></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -130,14 +132,15 @@ const ALL=G.flatMap(g=>g.items);
 const KEY="brojac-smene-v1";
 const CUT={d:17,n:5},TN={d:"Dnevna",n:"Noćna"};
 const guessT=t=>{const h=new Date(t).getHours();return h>=5&&h<17?"d":"n"};
-let st={a:{},b:{},start:Date.now(),hist:[]},undo=[];
+let st={a:{},b:{},start:Date.now(),on:false},undo=[];
 try{const s=JSON.parse(localStorage.getItem(KEY));if(s){if(s.c&&!s.a)s.a=s.c;delete s.c;st=Object.assign(st,s)}}catch(e){}
-if(!st.t)st.t=guessT(st.start);st.hist=[];
+if(!st.t)st.t=guessT(st.start);delete st.hist;
+if(st.on===undefined)st.on=["a","b"].some(p=>Object.values(st[p]||{}).some(v=>v>0));
+const MAX=12*3600e3;let autoMsg="";
 ALL.forEach(([k])=>{["a","b"].forEach(p=>{if(typeof st[p][k]!=="number")st[p][k]=0})});
 const $=id=>document.getElementById(id);
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
 const fmtD=t=>new Date(t).toLocaleString("sr-Latn-RS",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
-const esc=s=>String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const toast=m=>{const t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("on"),2200)};
 const cutoff=(start=st.start,t=st.t)=>{const d=new Date(start);d.setHours(CUT[t],0,0,0);if(+d<=start)d.setDate(d.getDate()+1);return +d};
 const per=()=>Date.now()>=cutoff()?"b":"a";
@@ -153,25 +156,27 @@ $("grid").innerHTML=G.map(g=>g.items.map(([k,l])=>`
  </div>`).join("")).join("");
 
 const render=()=>{
+ if(st.on&&Date.now()-st.start>=MAX){zero();st.on=false;save();autoMsg="Prethodna smena je automatski završena posle 12 sati i obrisana."}
+ document.body.classList.toggle("off",!st.on);
+ if(!st.on){const g=guessT(Date.now());$("startD").className=g==="d"?"p":"";$("startN").className=g==="n"?"p":"";$("imsg").textContent=autoMsg||"Izaberite smenu da počnete brojanje.";["undo","copy","close"].forEach(i=>$(i).disabled=true)}
+ else{autoMsg="";$("copy").disabled=false;$("close").disabled=false}
  const p=per(),o=p==="a"?"b":"a";
- if(p!==lastPer){lastPer=p;undo=[];if(p==="b")toast("Od "+CUT[st.t]+"h se broji posebno")}
+ if(st.on&&p!==lastPer){lastPer=p;undo=[];if(p==="b")toast("Od "+CUT[st.t]+"h se broji posebno")}
  ALL.forEach(([k])=>{$("n-"+k).textContent=st[p][k];$("p-"+k).textContent=(p==="b"||st[o][k])?lab(o)+": "+st[o][k]:""});
  $("chips").innerHTML=["a","b"].map(q=>`<div class="cr${q===p?" act":""}"><b>${lab(q).replace(/^./,m=>m.toUpperCase())}:</b>${G.map(g=>`<span class="chip" style="--g:${g.col}"><i></i>${g.t} ${g.items.reduce((a,[k])=>a+st[q][k],0)}</span>`).join("")}</div>`).join("");
  $("shift").textContent=TN[st.t]+" ▾";
  $("date").innerHTML="";
  const sp=document.createElement("span");sp.className="per";sp.textContent=p==="b"?"Posle "+CUT[st.t]+"h · posebno":"Do "+CUT[st.t]+"h";
  $("date").append(sp);
+ if(st.on){const e=document.createElement("span");e.textContent=" · kraj "+new Date(st.start+MAX).toLocaleTimeString("sr-Latn-RS",{hour:"2-digit",minute:"2-digit"});$("date").append(e)}
  $("hero").classList.toggle("after",p==="b");
- $("undo").disabled=!undo.length;
-};
-const renderHist=()=>{
- const cell=(h,k)=>{const a=Number((h.a||h.c||{})[k])||0,b=Number((h.b||{})[k])||0;return h.b?`${a} / ${b}`:`${a}`};
- $("hist").innerHTML=st.hist.length?`<p>Prikaz: do / posle granice (17h dnevna, 5h noćna)</p><div class="scroll"><table><thead><tr><th>Smena</th>${ALL.map(([,l])=>`<th>${esc(l)}</th>`).join("")}</tr></thead><tbody>${st.hist.slice().reverse().map(h=>`<tr><td>${esc((TN[h.t]||"")+" "+fmtD(h.start))}</td>${ALL.map(([k])=>`<td>${cell(h,k)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`:`<p>Još nema završenih smena. „Završi smenu” čuva brojeve ovde i kreće od nule.</p>`;
+ $("undo").disabled=!st.on||!undo.length;
 };
 const set=(p,k,v)=>{undo.push([p,k,st[p][k]]);if(undo.length>100)undo.shift();st[p][k]=Math.max(0,v);save();render()};
 
 document.addEventListener("click",e=>{
  const b=e.target.closest("button");if(!b)return;
+ if(!st.on&&(b.dataset.k||b.dataset.m||b.dataset.e))return;
  const p=per();
  if(b.dataset.k){const k=b.dataset.k;set(p,k,st[p][k]+1);b.classList.remove("bump");void b.offsetWidth;b.classList.add("bump");try{navigator.vibrate&&navigator.vibrate(15)}catch(_){}}
  else if(b.dataset.m){const k=b.dataset.m;if(st[p][k]>0)set(p,k,st[p][k]-1)}
@@ -181,8 +186,6 @@ document.addEventListener("click",e=>{
 $("undo").onclick=()=>{const u=undo.pop();if(!u)return;st[u[0]][u[1]]=u[2];save();render();toast("Poništeno")};
 $("shift").onclick=()=>{st.t=st.t==="d"?"n":"d";undo=[];lastPer=per();save();render();toast(TN[st.t]+" smena · granica "+CUT[st.t]+"h")};
 
-let dAct=null;
-const ask=(t,m,f)=>{$("dt").textContent=t;$("dmsg").textContent=m;dAct=f;$("dlg").showModal()};
 $("dno").onclick=()=>$("dlg").close();
 
 let eKey=null,eP="a";
@@ -191,14 +194,16 @@ $("eno").onclick=()=>$("edl").close();
 $("eyes").onclick=()=>{const v=parseInt($("eval").value,10);if(!isNaN(v)&&v>=0)set(eP,eKey,v);$("edl").close()};
 $("eval").addEventListener("keydown",e=>{if(e.key==="Enter")$("eyes").click()});
 
-
 const block=p=>G.map(g=>`\n${g.t}:\n`+g.items.map(([k,l])=>`  ${l}: ${st[p][k]}`).join("\n")).join("\n");
 const report=()=>{const two=per()==="b"||ALL.some(([k])=>st.b[k]);let r=`${TN[st.t]} smena od ${fmtD(st.start)}\n`;
  return two?r+`\n— ${lab("a").toUpperCase()} —`+block("a")+`\n\n— ${lab("b").toUpperCase()} —`+block("b"):r+block("a")};
 $("copy").onclick=async()=>{try{await navigator.clipboard.writeText(report());toast("Izveštaj kopiran")}catch(e){toast("Kopiranje nije dozvoljeno ovde")}};
 
 const zero=()=>{ALL.forEach(([k])=>{st.a[k]=0;st.b[k]=0});undo=[]};
-const finish=()=>{zero();st.hist=[];st.start=Date.now();st.t=guessT(st.start);lastPer=per();save();render();toast("Smena završena, sve obrisano")};
+const finish=()=>{zero();st.on=false;save();render();toast("Smena završena, sve obrisano")};
+const start=t=>{zero();st.on=true;st.t=t;st.start=Date.now();lastPer=per();save();render();toast((t==="d"?"Dnevna":"Noćna")+" smena počela")};
+$("startD").onclick=()=>start("d");
+$("startN").onclick=()=>start("n");
 $("close").onclick=()=>{$("dt").textContent="Završi smenu";$("dmsg").textContent="Svi brojevi (do i posle granice) biće obrisani. Ako vam treba izveštaj, izaberite „Kopiraj pa obriši”.";$("dlg").showModal()};
 $("dyes").onclick=()=>{$("dlg").close();finish()};
 $("dcp").onclick=async()=>{$("dlg").close();try{await navigator.clipboard.writeText(report())}catch(e){}finish();toast("Izveštaj kopiran, sve obrisano")};
